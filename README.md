@@ -11,4 +11,5 @@ To outline how to generate plots of similarities between tetrasomically pairing 
 ## File Structure
 
 /data/ genomes by sub directory (in .gitignore as /data/*)
+
 /outputs/ outputs (in .gitignore as /outputs/*)
