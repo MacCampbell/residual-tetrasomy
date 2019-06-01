@@ -22,7 +22,7 @@ data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
 data<-data %>% filter(Bottom >= 1000)
 
 #filter for similarity?
-data<-data %>% filter(Similarity >= 80)
+#data<-data %>% filter(Similarity >= 80)
 
 #Reduce comparisons to chromosomes of interest
 #Sensitive to order of chromos
