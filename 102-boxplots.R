@@ -4,6 +4,7 @@
 library(tidyverse)
 data<-as_tibble(read.table("./outputs/101/salmo-salar-101-lastz.result"))
 data$V2<-as.character(data$V2)
+data$V7<-as.character(data$V7)
 data$V12<-as.character(data$V12)
 
 #Split 
@@ -18,7 +19,10 @@ data<-data %>% mutate(Similarity = Top/Bottom*100)
 data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
 
 #filter for alignment lengths
-data<-data %>% filter(Bottom > 1000)
+data<-data %>% filter(Bottom >= 1000)
+
+#filter for similarity?
+data<-data %>% filter(Similarity >= 80)
 
 #Reduce comparisons to chromosomes of interest
 #Sensitive to order of chromos
@@ -26,6 +30,12 @@ data<-data %>% filter(Bottom > 1000)
 
 #Calculate the means to put on the plot later (just for now)
 means <- aggregate(Similarity ~  Comparison, data, mean)
+
+#Calculate the means and order data by high -> low
+data <- data %>% group_by(Comparison) %>% mutate(Mean = mean(Similarity)) %>%
+  arrange(desc(Mean))
+
+data$Comparison <- reorder(data$Comparison, desc(data$Mean))
 
 #Sample Sizes?
 samplesize <- data %>% group_by(Comparison) %>% count()
