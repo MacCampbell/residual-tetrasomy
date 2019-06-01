@@ -1,0 +1,55 @@
+#! /usr/local/bin/Rscript
+
+# Plot lastz output with error bars
+library(tidyverse)
+data<-as_tibble(read.table("./outputs/101/salmo-salar-101-lastz.result"))
+data$V2<-as.character(data$V2)
+data$V12<-as.character(data$V12)
+
+#Split 
+data<-data %>% separate(V12, c("Top", "Bottom"))
+data$Top<-as.numeric(data$Top)
+data$Bottom<-as.numeric(data$Bottom)
+
+#Calculate percent similarity
+data<-data %>% mutate(Similarity = Top/Bottom*100)
+
+#Create labels
+data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
+
+#filter for alignment lengths
+data<-data %>% filter(Bottom > 1000)
+
+#Reduce comparisons to chromosomes of interest
+#Sensitive to order of chromos
+#data<-data %>% filter(Comparison %in% c("omy01-omy23", "omy02-omy03","omy07-omy18"))
+
+#Calculate the means to put on the plot later (just for now)
+means <- aggregate(Similarity ~  Comparison, data, mean)
+
+#Sample Sizes?
+samplesize <- data %>% group_by(Comparison) %>% count()
+
+
+#Example code
+#ggplot(tetDf)+geom_boxplot(aes(Block,PID))+
+#  labs(x="Tetrasomic Pairing",y="Percent ID")+
+# coord_cartesian(ylim = c(80,100))+
+#theme_classic()+
+#theme(text = element_text(face="bold", size=18))+
+#theme(axis.text.x= element_text(face="bold", size=12,angle=45,hjust=1))+
+#theme(axis.text.y= element_text(face="bold", size=12))+
+#scale_x_discrete(limits=meanDf$Block)
+
+pdf("./outputs/102/salmo-salar-boxplots.pdf", width =11/2, height = 8.5/2)
+
+ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity))+
+  theme_classic()+
+  ylab("Perecent Similarity")+
+  theme(axis.text.x= element_text(angle=45,hjust=1))+
+  geom_text(data = means, aes(label = round(Similarity,2),
+                              x = Comparison, y = Similarity + 2)) +
+  geom_text(data = samplesize, aes(label = n, x=Comparison,
+                                   y = 100+1))
+
+dev.off()
