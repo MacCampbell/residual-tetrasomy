@@ -1,8 +1,14 @@
 #! /usr/local/bin/Rscript
+# Usage: ./102-boxplots.R salmo-salar
 
 # Plot lastz output with error bars
 library(tidyverse)
-data<-as_tibble(read.table("./outputs/101/salmo-salar-101-lastz.result"))
+
+args <- commandArgs(trailingOnly = TRUE)
+
+
+
+data<-as_tibble(read.table(paste("./outputs/101/",args[1],"-101-lastz.result", sep="")))
 data$V2<-as.character(data$V2)
 data$V7<-as.character(data$V7)
 data$V12<-as.character(data$V12)
@@ -51,7 +57,7 @@ samplesize <- data %>% group_by(Comparison) %>% count()
 #theme(axis.text.y= element_text(face="bold", size=12))+
 #scale_x_discrete(limits=meanDf$Block)
 
-pdf("./outputs/102/salmo-salar-boxplots.pdf", width =11/2, height = 8.5/2)
+pdf(paste("./outputs/102/",args[1],"-boxplots.pdf", sep=""), width =11/2, height = 8.5/2)
 
 ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity))+
   theme_classic()+
