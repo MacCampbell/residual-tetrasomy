@@ -5,8 +5,7 @@
 library(tidyverse)
 
 args <- commandArgs(trailingOnly = TRUE)
-
-
+#args<-c("salmo-salar")
 
 data<-as_tibble(read.table(paste("./outputs/101/",args[1],"-101-lastz.result", sep="")))
 data$V2<-as.character(data$V2)
@@ -69,3 +68,9 @@ ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity))+
                                    y = 100+1))
 
 dev.off()
+
+#Save output as .rda renamed by species
+assign(paste(args[1]), data)
+
+save(list=paste(args[1]), file=paste("./outputs/102/",args[1],".rda",sep=""))
+
