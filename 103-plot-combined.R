@@ -55,12 +55,12 @@ data$HomologousPair <- factor(data$HomologousPair, levels = order$HomologousPair
 #Get Medians for plotting
 totOrder <- data %>% group_by(Species, HomologousPair, Median) %>% summarize()
   
-ggplot(data)+geom_boxplot(aes(x=HomologousPair, y=Similarity))+
+ggplot(data)+geom_boxplot(aes(x=HomologousPair, y=Similarity), outlier.shape=NA)+
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1))+
   facet_grid(.~Species)+
-  geom_text(data = totOrder, aes(label = round(Median,1),
+  geom_text(data = totOrder, aes(label = round(Median,2),
                               x = HomologousPair, y = 100 + 2),
             size=2)
 
