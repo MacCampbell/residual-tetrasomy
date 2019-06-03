@@ -9,6 +9,10 @@ load("./outputs/102/o-mykiss.rda")
 `salmo-salar` <- `salmo-salar` %>% add_count(Comparison)
 `o-mykiss`    <- `o-mykiss`    %>% add_count(Comparison)
 
+#Adding Median variable (already grouped by comparison)
+`salmo-salar` <- `salmo-salar` %>% mutate(Median = median(Similarity))
+`o-mykiss`    <- `o-mykiss`    %>% mutate(Median = median(Similarity))
+
 #Filter salmo-salar based on the comparisons we want
 `salmo-salar` <- `salmo-salar` %>% filter(Comparison %in% c("ssa02-ssa12","ssa11-ssa26","ssa07-ssa17",
                                                            "ssa02-ssa05", "ssa03-ssa06","ssa01-ssa18",
@@ -27,28 +31,37 @@ load("./outputs/102/o-mykiss.rda")
                                                                           "NA")))))) )))
 #Filtering the columns for plotting 
 
-`salmo-salar` <- `salmo-salar` %>% select(HomologousPair, Similarity, Mean, n) %>% mutate(Species = "salmo-salar")
-`o-mykiss`    <- `o-mykiss`  %>% select(HomologousPair, Similarity, Mean, n) %>% mutate(Species = "o-mykiss")
+`salmo-salar` <- `salmo-salar` %>% select(HomologousPair, Similarity, Mean, Median, n) %>% mutate(Species = "salmo-salar")
+`o-mykiss`    <- `o-mykiss`  %>% select(HomologousPair, Similarity, Mean, Median, n) %>% mutate(Species = "o-mykiss")
 
 data<-bind_rows(`salmo-salar`, `o-mykiss`)
 
+
+#Reorder by median
+order<-`salmo-salar` %>% select(HomologousPair, Median) %>% unique() %>% arrange(desc(Median))
+
 #Plot in a specified order
 data$Species<- factor(data$Species, levels = c("salmo-salar", "o-mykiss"))
-data$HomologousPair <- factor(data$HomologousPair, levels = c("ssa03-ssa06",
-                                                             "ssa02-ssa05",
-                                                             "ssa11-ssa26",
-                                                            "ssa02-ssa12",
-                                                            "ssa16-ssa17",
-                                                            "ssa07-ssa17",
-                                                            "ssa04-ssa08",
-                                                            "ssa01-ssa18"))
+data$HomologousPair <- factor(data$HomologousPair, levels = order$HomologousPair)
+#                                                      levels = c("ssa03-ssa06",
+#                                                             "ssa02-ssa05",
+#                                                             "ssa11-ssa26",
+#                                                            "ssa02-ssa12",
+#                                                            "ssa16-ssa17",
+#                                                            "ssa07-ssa17",
+#                                                            "ssa04-ssa08",
+#                                                            "ssa01-ssa18"))
 
-
-
+#Get Medians for plotting
+totOrder <- data %>% group_by(Species, HomologousPair, Median) %>% summarize()
+  
 ggplot(data)+geom_boxplot(aes(x=HomologousPair, y=Similarity))+
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1))+
-  facet_grid(.~Species)
+  facet_grid(.~Species)+
+  geom_text(data = totOrder, aes(label = round(Median,1),
+                              x = HomologousPair, y = 100 + 2),
+            size=2)
 
 ggsave("./outputs/103/combined-plot.pdf", width=11/2, height=8.5/2)
