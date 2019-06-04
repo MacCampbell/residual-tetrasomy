@@ -1,0 +1,10 @@
+ssa02 ssa05
+ssa02 ssa12
+ssa03 ssa06
+ssa04 ssa08
+ssa07 ssa17
+ssa11 ssa26
+ssa16 ssa17
+ssa09 ssa20
+ssa05 ssa09
+ssa01 ssa18
