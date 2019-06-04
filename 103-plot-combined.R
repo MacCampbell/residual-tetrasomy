@@ -53,15 +53,19 @@ data$HomologousPair <- factor(data$HomologousPair, levels = order$HomologousPair
 #                                                            "ssa01-ssa18"))
 
 #Get Medians for plotting
-totOrder <- data %>% group_by(Species, HomologousPair, Median) %>% summarize()
+totOrder <- data %>% group_by(Species, Comparison, HomologousPair, Median) %>% summarize()
   
+#Note: To change x-axis labels in differnt facets, you can use "scales="free_x" in facet_grid
+# e.g. https://github.com/duttashi/visualizer/issues/47
 ggplot(data)+geom_boxplot(aes(x=HomologousPair, y=Similarity), outlier.shape=NA)+
-  theme_classic()+
   ylab("Perecent Similarity")+
-  theme(axis.text.x= element_text(angle=45,hjust=1))+
-  facet_grid(.~Species)+
+  xlab("Homologous Pair")+
+  facet_grid(.~Species, scales="free_x")+
   geom_text(data = totOrder, aes(label = round(Median,2),
                               x = HomologousPair, y = 100 + 2),
-            size=2)
+            size=2)+
+  theme_bw()+
+  theme(axis.text.x= element_text(angle=45,hjust=1))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 ggsave("./outputs/103/combined-plot.pdf", width=11/2, height=8.5/2)

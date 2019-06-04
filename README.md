@@ -30,10 +30,13 @@ In order to work with NCBI genome files for our purposes, unscaffolded contigs n
   * $ samtools faidx salmoChroms.fasta ssa16 > salmo-salar-ssa16.fasta
 
 ## Identifying centromeres and further splitting
-1. TBD - presumably with alignment to _Esox lucius_ or self
+Appears to be unecessary.
 
 # Running lastz and Generating Figures
 
-1. Dependencies: lastz, perl, Rscript, gnu-parallel
+__101-lastz.pl__ Dependencies: lastz, perl, Rscript, gnu-parallel
 
+__102-boxplots.R__
+
+__103-plot-combied.R__ To Do: Label chromosomes by species not by _Salmo salar_ homology
 
