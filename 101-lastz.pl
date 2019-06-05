@@ -2,7 +2,7 @@
 # Started by Mac Campbell DrMacCampbell@gmail.com
 # April 17, 2019, Revision to GitHub on 05312019
 # The goal is to drive multiple lastz comparisons using
-# a "myPairs.txt" file that is tab-delimited and
+# a "myPairs.txt" file that is space-delimited and
 # gnu-parallel
 
 # Usage: ./101-lastz.pl processors genus-species path/to/genus-species-pairs

@@ -27,12 +27,13 @@ In order to work with NCBI genome files for our purposes, unscaffolded contigs n
 3. This file should be placed in /data/salmo-salar/
 4. You can further split as needed like so:
   * $ samtools faidx salmoChroms.fasta ssa17 > salmo-salar-ssa17.fasta
-  * $ samtools faidx salmoChroms.fasta ssa16 > salmo-salar-ssa16.fasta
+  * Or with the *pairs.txt files: cut -f 1 -d ' ' t-thymallus-pairs.txt | while read line; do samtools faidx GCA_004348285.1_ASM434828v1_genomic.fna $line > t-thymallus-$line.fasta; done;
 
 ## Identifying centromeres and further splitting
 Appears to be unecessary.
 
 # Running lastz and Generating Figures
+Usage notes are noted in each script at the beginning.
 
 __101-lastz.pl__ Dependencies: lastz, perl, Rscript, gnu-parallel
 
