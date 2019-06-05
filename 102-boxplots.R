@@ -3,6 +3,7 @@
 
 # Plot lastz output with error bars
 library(tidyverse)
+library(matrixStats)
 
 args <- commandArgs(trailingOnly = TRUE)
 #args<-c("salmo-salar")
@@ -33,17 +34,21 @@ data<-data %>% filter(Bottom >= 1000)
 #Sensitive to order of chromos
 #data<-data %>% filter(Comparison %in% c("omy01-omy23", "omy02-omy03","omy07-omy18"))
 
-#Calculate the means to put on the plot later (just for now)
-means <- aggregate(Similarity ~  Comparison, data, mean)
+#Calculate the medians to put on the plot later (just for now)
+#medians <- aggregate(Similarity ~  Comparison, data, )
 
 #Calculate the means and order data by high -> low
-data <- data %>% group_by(Comparison) %>% mutate(Mean = mean(Similarity)) %>%
-  arrange(desc(Mean))
+#data <- data %>% group_by(Comparison) %>% mutate(Mean = mean(Similarity)) %>%
+#  arrange(desc(Mean))
 
-data$Comparison <- reorder(data$Comparison, desc(data$Mean))
+#Calculate weighted medians
+data <- data %>% separate(V14, sep="[/]", into = c("AlignmentLength","Length"))
+data$AlignmentLength <- as.numeric(data$AlignmentLength)
+data <- data %>% group_by(Comparison) %>% mutate(Median = weightedMedian(Similarity, w=AlignmentLength))
+data$Comparison <- reorder(data$Comparison, desc(data$Median))
 
 #Sample Sizes?
-samplesize <- data %>% group_by(Comparison) %>% count()
+samplesize <- data %>% group_by(Comparison) %>% count_()
 
 
 #Example code
@@ -58,12 +63,14 @@ samplesize <- data %>% group_by(Comparison) %>% count()
 
 pdf(paste("./outputs/102/",args[1],"-boxplots.pdf", sep=""), width =11/2, height = 8.5/2)
 
-ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity))+
+ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLength),
+                          outlier.size=0.1, outlier.alpha=0.5,
+                          outlier.color="gray50", outlier.shape=15)+
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1))+
-  geom_text(data = means, aes(label = round(Similarity,2),
-                              x = Comparison, y = Similarity + 2)) +
+  #geom_text(data = means, aes(label = round(Similarity,2),
+   #                           x = Comparison, y = Similarity + 2)) +
   geom_text(data = samplesize, aes(label = n, x=Comparison,
                                    y = 100+1))
 
