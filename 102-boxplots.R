@@ -6,7 +6,12 @@ library(tidyverse)
 library(matrixStats)
 
 args <- commandArgs(trailingOnly = TRUE)
-#args<-c("salmo-salar")
+args<-c("salmo-salar")
+
+protos<-as_tibble(read.table(paste("./data/",args[1],"/",args[1], "-protokaryotype.txt", sep=""))) %>%
+  rename(Protokaryotype = V1, Comparison = V2)
+protos$Protokaryotype<-as.character(protos$Protokaryotype)
+protos$Comparison<-as.character(protos$Comparison)
 
 data<-as_tibble(read.table(paste("./outputs/101/",args[1],"-101-lastz.result", sep="")))
 data$V2<-as.character(data$V2)
@@ -23,6 +28,10 @@ data<-data %>% mutate(Similarity = Top/Bottom*100)
 
 #Create labels
 data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
+
+#Join up protokaryotype
+data<- data %>% filter(Comparison %in% protos$Comparison)
+data <-left_join(data, protos)
 
 #filter for alignment lengths
 data<-data %>% filter(Bottom >= 1000)
@@ -46,33 +55,27 @@ data <- data %>% separate(V14, sep="[/]", into = c("AlignmentLength","Length"))
 data$AlignmentLength <- as.numeric(data$AlignmentLength)
 data <- data %>% group_by(Comparison) %>% mutate(Median = weightedMedian(Similarity, w=AlignmentLength))
 data$Comparison <- reorder(data$Comparison, desc(data$Median))
+data$Protokaryotype <- reorder(data$Protokaryotype, desc(data$Median))
 
 #Sample Sizes?
 samplesize <- data %>% group_by(Comparison) %>% count_()
+samplesize <- left_join(samplesize, protos)
+#samplesize <- samplesize %>% filter(n >= 500)
+#data <- data %>% filter(Comparison %in% samplesize$Comparison)
 
+pdf(paste("./outputs/102/",args[1],"-boxplots.pdf", sep=""), width =11, height = 8.5/2)
 
-#Example code
-#ggplot(tetDf)+geom_boxplot(aes(Block,PID))+
-#  labs(x="Tetrasomic Pairing",y="Percent ID")+
-# coord_cartesian(ylim = c(80,100))+
-#theme_classic()+
-#theme(text = element_text(face="bold", size=18))+
-#theme(axis.text.x= element_text(face="bold", size=12,angle=45,hjust=1))+
-#theme(axis.text.y= element_text(face="bold", size=12))+
-#scale_x_discrete(limits=meanDf$Block)
-
-pdf(paste("./outputs/102/",args[1],"-boxplots.pdf", sep=""), width =11/2, height = 8.5/2)
-
-ggplot(data)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLength),
+ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLength),
                           outlier.size=0.1, outlier.alpha=0.5,
                           outlier.color="gray50", outlier.shape=15)+
   theme_classic()+
   ylab("Perecent Similarity")+
-  theme(axis.text.x= element_text(angle=45,hjust=1))+
-  #geom_text(data = means, aes(label = round(Similarity,2),
-   #                           x = Comparison, y = Similarity + 2)) +
-  geom_text(data = samplesize, aes(label = n, x=Comparison,
-                                   y = 100+1))
+  theme(axis.text.x= element_text(angle=45,hjust=1, face = "bold"))+
+  geom_text(data = samplesize, aes(label = Comparison,
+                             x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
+  ylim(75,105)
+  #geom_text(data = samplesize, aes(label = n, x=Protokaryotype,
+  #                                 y = 100+1), size=3)
 
 dev.off()
 
