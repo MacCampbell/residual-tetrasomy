@@ -6,7 +6,7 @@ library(tidyverse)
 library(matrixStats)
 
 args <- commandArgs(trailingOnly = TRUE)
-args<-c("salmo-salar")
+#args<-c("o-mykiss")
 
 protos<-as_tibble(read.table(paste("./data/",args[1],"/",args[1], "-protokaryotype.txt", sep=""))) %>%
   rename(Protokaryotype = V1, Comparison = V2)
@@ -71,11 +71,11 @@ ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLe
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1, face = "bold"))+
-  geom_text(data = samplesize, aes(label = Comparison,
-                             x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
-  ylim(75,105)
-  #geom_text(data = samplesize, aes(label = n, x=Protokaryotype,
-  #                                 y = 100+1), size=3)
+  geom_text(data = samplesize, aes(label = n, x=Protokaryotype,
+                                   y = 100+1), size=3)+
+  #geom_text(data = samplesize, aes(label = Comparison,
+  #                           x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
+  ylim(75,103)
 
 dev.off()
 
