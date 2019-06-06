@@ -6,7 +6,7 @@ library(tidyverse)
 library(matrixStats)
 
 args <- commandArgs(trailingOnly = TRUE)
-#args<-c("o-mykiss")
+#args<-c("o-tshaw")
 
 protos<-as_tibble(read.table(paste("./data/",args[1],"/",args[1], "-protokaryotype.txt", sep=""))) %>%
   rename(Protokaryotype = V1, Comparison = V2)
