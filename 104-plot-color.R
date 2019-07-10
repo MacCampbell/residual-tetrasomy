@@ -71,18 +71,24 @@ samplesize <- left_join(samplesize, protos)
 
 pdf(paste("./outputs/104/",args[1],"-boxplots.pdf", sep=""), width =11, height = 8.5/2)
 
+
+line<-data %>% select(Protokaryotype, Median) %>% unique() %>% ungroup() %>% mutate(Mean=mean(Median))
+yint<-line$Mean  %>% unique()
+
 ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLength, fill=Type),
                           outlier.size=0.1, outlier.alpha=0.5, outlier.shape=15,
                           alpha=0.5)+
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1, face = "bold"))+
+  geom_hline(yintercept = yint, alpha=0.75, linetype="dashed", color="grey50")+
   geom_text(data = samplesize, aes(label = n, x=Protokaryotype,
                                    y = 100+1), size=3)+
   #geom_text(data = samplesize, aes(label = Comparison,
   #                           x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
   ylim(75,103)+
-  scale_fill_viridis_d()
+  scale_fill_viridis_d(direction=-1)+
+  theme(legend.position = "none")
 
 dev.off()
 
