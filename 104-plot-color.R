@@ -92,14 +92,19 @@ ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLe
 
 dev.off()
 
-#I declare a t-test!
-tester<-data %>% group_by(Protokaryotype) %>% select(Protokaryotype, Type, Median) %>% unique()
-test1 <- tester %>% ungroup %>% filter(Type == "Disomic")
-test2 <- tester %>% ungroup %>% filter(Type == "Tetrasomic")
-result<-t.test(test1$Median, test2$Median)
+#t-test of each magic eight versus all the disomic ones
+ttester <- function(chrom) {
+  sub1 <- filter(data, Protokaryotype == chrom)
+  sub2 <- filter(data, !(Protokaryotype %in% eight))
+  result <- t.test(sub1$Similarity, sub2$Similarity)
+  return(result)
+}
+
+eightResult<-lapply(eight, ttester)
 
 sink(paste("./outputs/104/",args[1],"-t-test.txt", sep=""))
-print(result)
+print(eight)
+print(eightResult)
 sink()
 
 #Save output as .rda renamed by species
