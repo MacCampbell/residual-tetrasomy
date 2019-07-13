@@ -131,6 +131,7 @@ eightCompare <- function(combo) {
   v1 <- filter(data, Protokaryotype == combo[1])
   v2 <- filter(data, Protokaryotype == combo[2])
   result <- wilcox.test(v1$Similarity, v2$Similarity)
+  return(result)
 }
 
 eightCompared<-apply(combos, 2, eightCompare)
