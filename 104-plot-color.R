@@ -93,18 +93,54 @@ ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLe
 dev.off()
 
 #t-test of each magic eight versus all the disomic ones
-ttester <- function(chrom) {
+tester <- function(chrom) {
   sub1 <- filter(data, Protokaryotype == chrom)
   sub2 <- filter(data, !(Protokaryotype %in% eight))
-  result <- t.test(sub1$Similarity, sub2$Similarity)
+  result <- wilcox.test(sub1$Similarity, sub2$Similarity)
   return(result)
 }
 
-eightResult<-lapply(eight, ttester)
+eightResult<-lapply(eight, tester)
 
-sink(paste("./outputs/104/",args[1],"-t-test.txt", sep=""))
+sink(paste("./outputs/104/",args[1],"-test.txt", sep=""))
 print(eight)
 print(eightResult)
+sink()
+
+# Are any of the magic eight different from each other?
+subTester <- function(chrom) {
+  sub1 <- filter(data, Protokaryotype %in% eight) 
+  sub2 <- filter(sub1, Protokaryotype == chrom)
+  sub3 <- filter(sub1, Protokaryotype != chrom)
+  result <- wilcox.test(sub2$Similarity, sub3$Similarity, exact=TRUE, conf.int = TRUE)
+  return(result)
+}
+
+magicEight<-lapply(eight, subTester)
+
+
+sink(paste("./outputs/104/",args[1],"-eight-only-test.txt", sep=""))
+print(eight)
+print(magicEight)
+sink()
+
+#Can we get all possible magic eights and see what that does?
+combos<-combn(eight,2)
+
+eightCompare <- function(combo) {
+  v1 <- filter(data, Protokaryotype == combo[1])
+  v2 <- filter(data, Protokaryotype == combo[2])
+  result <- wilcox.test(v1$Similarity, v2$Similarity)
+}
+
+eightCompared<-apply(combos, 2, eightCompare)
+
+sink(paste("./outputs/104/",args[1],"-eight-compare.txt", sep=""))
+print(combos)
+for (i in (1:length(eightCompared)) ) {
+print(combos[,i])
+print(eightCompared[i])
+}
 sink()
 
 #Save output as .rda renamed by species
