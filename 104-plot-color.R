@@ -88,7 +88,10 @@ ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLe
   #                           x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
   ylim(75,103)+
   scale_fill_viridis_d(direction=-1)+
-  theme(legend.position = "none")
+  theme(legend.position = "none")+
+  ggtitle(paste(args[1]))+
+  theme(plot.title = element_text(hjust = 0.5))
+
 
 dev.off()
 
