@@ -1,6 +1,6 @@
 #! /usr/local/bin/Rscript
 # Usage: ./104-plot-color salmo-salar
-# Or$ cat taxon-list.txt | while read line; do ./104-plot-color.R $line; done;
+# Or $ cat taxon-list.txt | while read line; do ./104-plot-color.R $line; done;
 # Plot lastz output with error bars
 library(tidyverse)
 library(matrixStats)
@@ -95,56 +95,45 @@ ggplot(data)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLe
 
 dev.off()
 
-#t-test of each magic eight versus all the disomic ones
-tester <- function(chrom) {
-  sub1 <- filter(data, Protokaryotype == chrom)
-  sub2 <- filter(data, !(Protokaryotype %in% eight))
-  result <- wilcox.test(sub1$Similarity, sub2$Similarity)
-  return(result)
-}
+#wilcox test of all magic eight versus all the disomic ones
 
-eightResult<-lapply(eight, tester)
+tetrasomic<-filter(data, Protokaryotype %in% eight)
+disomic<-filter(data, !(Protokaryotype %in% eight))
+
+
+eightResult<-wilcox.test(tetrasomic$Similarity, disomic$Similarity)
 
 sink(paste("./outputs/104/",args[1],"-test.txt", sep=""))
-print(eight)
+print("Comparison of Magic Eight to Disomic Chroms")
+mean(tetrasomic$Similarity)
+mean(disomic$Similarity)
+var(tetrasomic$Similarity)
+var(disomic$Similarity)
 print(eightResult)
 sink()
 
 # Are any of the magic eight different from each other?
+# Let's use the Kruskal-Wallis Rank Sum Test
 subTester <- function(chrom) {
-  sub1 <- filter(data, Protokaryotype %in% eight) 
-  sub2 <- filter(sub1, Protokaryotype == chrom)
-  sub3 <- filter(sub1, Protokaryotype != chrom)
-  result <- wilcox.test(sub2$Similarity, sub3$Similarity, exact=TRUE, conf.int = TRUE)
+ x<-filter(data, Protokaryotype %in% eight)
+ g<-x %>% ungroup() %>% select(Protokaryotype) %>% mutate(Coding = ifelse(Protokaryotype != chrom, 0, 
+                                                               ifelse(Protokaryotype == chrom, 1, 0)))
+  
+  result <- kruskal.test(x$Similarity, g$Coding)
   return(result)
 }
 
-magicEight<-lapply(eight, subTester)
+magicEightTest<-lapply(eight, subTester)
 
 
 sink(paste("./outputs/104/",args[1],"-eight-only-test.txt", sep=""))
 print(eight)
-print(magicEight)
-sink()
+for (i in (1:length(eight)) ) {
+  print(eight[i])
+  print(magicEightTest[i])
 
-#Can we get all possible magic eights and see what that does?
-combos<-combn(eight,2)
+  }
 
-eightCompare <- function(combo) {
-  v1 <- filter(data, Protokaryotype == combo[1])
-  v2 <- filter(data, Protokaryotype == combo[2])
-  result <- wilcox.test(v1$Similarity, v2$Similarity)
-  return(result)
-}
-
-eightCompared<-apply(combos, 2, eightCompare)
-
-sink(paste("./outputs/104/",args[1],"-eight-compare.txt", sep=""))
-print(combos)
-for (i in (1:length(eightCompared)) ) {
-print(combos[,i])
-print(eightCompared[i])
-}
 sink()
 
 #Save output as .rda renamed by species
