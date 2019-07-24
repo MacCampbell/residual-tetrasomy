@@ -124,7 +124,7 @@ model1 = normalmixEM(y$Difference, k=1)
 model2 = normalmixEM(y$Difference, k=2)
 model3 = normalmixEM(y$Difference, k=3)
 model4 = normalmixEM(y$Difference, k=4)
-
+model5 = normalmixEM(y$Difference, k=5)
 plot(model, which=2)
 
 
@@ -150,7 +150,7 @@ plot_mix_comps <- function(x, mu, sigma, lam) {
   lam * dnorm(x, mu, sigma)
 }
 
-mixmdl<-model3
+mixmdl<-model2
 estimators<-as.data.frame(mixmdl[c("lambda", "mu", "sigma")])
 
 ggplot(y, aes(x=Difference)) +
@@ -161,7 +161,7 @@ ggplot(y, aes(x=Difference)) +
   stat_function(geom = "line", fun = plot_mix_comps,
                 args = list(mixmdl$mu[2], mixmdl$sigma[2], lam = mixmdl$lambda[2]),
                 colour = "blue", lwd = 1.5) +
-  stat_function(geom = "line", fun = plot_mix_comps,
-                args = list(mixmdl$mu[3], mixmdl$sigma[3], lam = mixmdl$lambda[3]),
-                colour = "yellow", lwd = 1.5) +
+ # stat_function(geom = "line", fun = plot_mix_comps,
+  #              args = list(mixmdl$mu[3], mixmdl$sigma[3], lam = mixmdl$lambda[3]),
+   #             colour = "yellow", lwd = 1.5) +
   theme_bw()
