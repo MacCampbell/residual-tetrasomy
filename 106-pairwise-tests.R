@@ -6,8 +6,8 @@ library(tidyverse)
 library(matrixStats)
 library(viridis)
 library(mixtools)
-#args <- commandArgs(trailingOnly = TRUE)
-args<-c("salmo-salar")
+args <- commandArgs(trailingOnly = TRUE)
+#args<-c("salmo-salar")
 
 protos<-as_tibble(read.table(paste("./data/",args[1],"/",args[1], "-protokaryotype.txt", sep=""))) %>%
   rename(Protokaryotype = V1, Comparison = V2)
@@ -59,7 +59,7 @@ data$Comparison <- reorder(data$Comparison, desc(data$Median))
 data$Protokaryotype <- reorder(data$Protokaryotype, desc(data$Median))
 
 eight<-c(2,20,22,9,11,23,25,1)
-
+tetra<-c(2,20,22,9,11,23,25)
 data <- data %>% mutate(Type = ifelse(Protokaryotype %in% eight, "Tetrasomic", "Disomic"))
 
 
@@ -88,14 +88,15 @@ x <- as_tibble(setNames(data.frame(matrix(ncol=3, nrow=0)), c("Chrom1", "Chrom2"
 for (i in (1:length(compared)) ) {
   x<-add_row(x, Chrom1=combos[1,i], Chrom2=combos[2,i], pvalue=compared[i])
 }
-compared<-apply(combos, 2, Compare)
-nonsig <- x %>% filter(pvalue >= 0.005)
+#compared<-apply(combos, 2, Compare)
+#nonsig <- x %>% filter(pvalue >= 0.005)
+
+
+##A parametric type approach
 
 summary <- data %>% group_by(Protokaryotype, Median) %>% mutate(Mean=mean(Similarity)) %>% 
   select(Protokaryotype, Mean, Median) %>% ungroup() %>% group_by(Protokaryotype, Mean, Median) %>% 
   summarize()
-
-##A parametric type approach
 
 Medians <- function(combo) {
   v1 <- filter(summary, Protokaryotype == combo[1])
@@ -120,11 +121,11 @@ ggplot(y, aes(x=Difference))+geom_histogram() + theme_bw() + ylab("Count")
 model = normalmixEM(y$Difference, k=2)
 estimators<-as.data.frame(model[c("lambda", "mu", "sigma")])
 
-model1 = normalmixEM(y$Difference, k=1)
+#model1 = normalmixEM(y$Difference, k=1)
 model2 = normalmixEM(y$Difference, k=2)
-model3 = normalmixEM(y$Difference, k=3)
-model4 = normalmixEM(y$Difference, k=4)
-model5 = normalmixEM(y$Difference, k=5)
+#model3 = normalmixEM(y$Difference, k=3)
+#model4 = normalmixEM(y$Difference, k=4)
+#model5 = normalmixEM(y$Difference, k=5)
 plot(model, which=2)
 
 
@@ -165,3 +166,37 @@ ggplot(y, aes(x=Difference)) +
   #              args = list(mixmdl$mu[3], mixmdl$sigma[3], lam = mixmdl$lambda[3]),
    #             colour = "yellow", lwd = 1.5) +
   theme_bw()
+
+##Let's make some columns
+
+
+#z <-y %>% mutate(Type = ifelse(((Chrom1 %in% tetra) & (Chrom2 %in% tetra)), "Tetrasomic", 
+#                        ifelse((!(Chrom1 %in% tetra) & !(Chrom2 %in% tetra)), "Disomic",
+#                        ifelse((Chrom1 == "1") | (Chrom2=="1"), "PK01", "Other"))))
+
+z <-y %>% mutate(Type = ifelse(((Chrom1 %in% tetra) & (Chrom2 %in% tetra)), "Tetrasomic", 
+                               ifelse((!(Chrom1 %in% tetra) & !(Chrom2 %in% tetra)), "Disomic", "Other")))
+
+
+mixmdl<-model2
+estimators<-as.data.frame(mixmdl[c("lambda", "mu", "sigma")])
+
+pdf(paste("./outputs/106/", args[1], "-mixed-histos.pdf", sep=""), width = 11, height=8.5)
+
+ggplot(z, aes(x=Difference))+geom_histogram(aes(x=Difference, ..density..,  fill=Type), binwidth = 0.25)+
+  theme_bw() +
+  ylab("Density")
+
+ggplot(z, aes(x=Difference))+geom_histogram(aes(x=Difference, ..density..), binwidth = 0.25) + 
+  stat_function(geom = "line", fun = plot_mix_comps,
+                args = list(mixmdl$mu[1], mixmdl$sigma[1], lam = mixmdl$lambda[1]),
+                colour = "red", lwd = 1.5) +
+  stat_function(geom = "line", fun = plot_mix_comps,
+                args = list(mixmdl$mu[2], mixmdl$sigma[2], lam = mixmdl$lambda[2]),
+                colour = "blue", lwd = 1.5) +
+   theme_bw() +
+  ylab("Density")
+
+dev.off()
+
+zz<-z %>% filter(Difference > (estimators$mu[2]-estimators$sigma[2]))
