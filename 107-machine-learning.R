@@ -102,9 +102,12 @@ training$Type<-train.labels
 
 
 #Can we identify the best k?
-trControl <- trainControl(method  = "cv",
-                          number  = 10)
+#trControl <- trainControl(method  = "cv",
+#                          number  = 10)
 
+trControl <- trainControl(method = "repeatedcv",
+                          number = 10,
+                          repeats = 10)
 fit <- train(Type ~ .,
              method     = "knn",
              tuneGrid   = expand.grid(k = 1:10),
