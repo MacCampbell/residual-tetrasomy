@@ -106,7 +106,7 @@ training$Type<-train.labels
 #                          number  = 10)
 
 trControl <- trainControl(method = "repeatedcv",
-                          number = 10,
+                          number = 100,
                           repeats = 10)
 fit <- train(Type ~ .,
              method     = "knn",
