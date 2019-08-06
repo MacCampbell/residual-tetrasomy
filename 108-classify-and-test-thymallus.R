@@ -99,7 +99,10 @@ line<-total %>% select(Comparison, Median) %>% unique() %>% ungroup() %>% mutate
 yint<-line$Mean  %>% unique()
 
 #Now to test for differences
-kw <- kruskal.test(total$Similarity, total$Prediction)
+
+disomic<-filter(total, Prediction=="Disomic")
+tetrasomic<-filter(total, Prediction=="Tetrasomic")
+kw <- wilcox.test(disomic$Similarity, tetrasomic$Similarity)
 
 pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
 ggplot(fit)
@@ -108,7 +111,7 @@ ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="bl
   scale_fill_viridis_d(direction=-1) + 
   geom_text(aes(x=Comparison, y=(Median+5)), label=summary$Probability, size=2)+
   theme_classic()+
-  theme(axis.text.x=element_text(angle=45))
+  theme(axis.text.x=element_text(angle=45, hjust=1))
 
 
 
@@ -129,7 +132,7 @@ ggplot(total)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLengt
   ylim(75,103)+
   scale_fill_viridis_d(direction=-1)+
   theme(legend.position = "none")+
-  ggtitle(paste(args[1], "Chi-squared =", round(kw$statistic,2), "df = ", kw$parameter, "p-value =", kw$p.value, sep=" "))+
+  ggtitle(paste(args[1], "W =", round(kw$statistic,2), "p-value =", kw$p.value, sep=" "))+
   theme(plot.title = element_text(hjust = 0.5))+
   theme(axis.text.x=element_text(angle=45, hjust=1))
 
