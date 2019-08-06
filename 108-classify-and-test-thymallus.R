@@ -6,10 +6,7 @@ library(gmodels)
 library(viridis)
 library(matrixStats)
 library(caret)
-# ./107-machine-learning.R salmo-salar
-### This is recycled
-#args <- commandArgs(trailingOnly = TRUE)
-#args<-c("s-alpinus")
+
 args<-c("t-thymallus")
 
 data<-as_tibble(read.table(paste("./outputs/101/",args[1],"-101-lastz.result", sep="")))
@@ -94,13 +91,46 @@ pred <- knn(train = training[, 3, drop=FALSE], test = summary[, 3, drop=FALSE], 
 summary$Prediction <- pred
 summary$Probability <-round(attr(pred, "prob"),2)
 
-pdf(paste("./outputs/107/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
+
+#Now to generate boxplots as well
+total<-left_join(data, summary)
+
+line<-total %>% select(Comparison, Median) %>% unique() %>% ungroup() %>% mutate(Mean=mean(Median))
+yint<-line$Mean  %>% unique()
+
+#Now to test for differences
+kw <- kruskal.test(total$Similarity, total$Prediction)
+
+pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
 ggplot(fit)
 
 ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
   geom_text(aes(x=Comparison, y=(Median+5)), label=summary$Probability, size=2)+
   theme_classic()+
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+  theme(axis.text.x=element_text(angle=45))
+
+
+
+dev.off()
+
+pdf(paste("./outputs/108/",args[1],"-boxplots.pdf", sep=""), width =11, height = 8.5/2)
+ggplot(total)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLength, fill=Prediction),
+                           outlier.size=0.1, outlier.alpha=0.5, outlier.shape=15,
+                           alpha=0.5)+
+  theme_classic()+
+  ylab("Perecent Similarity")+
+  theme(axis.text.x= element_text(angle=45,hjust=1, face = "bold"))+
+  geom_hline(yintercept = yint, alpha=0.75, linetype="dashed", color="grey50")+
+  geom_text(data = samplesize, aes(label = n, x=Comparison,
+                                   y = 100+1), size=3)+
+  #geom_text(data = samplesize, aes(label = Comparison,
+  #                           x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
+  ylim(75,103)+
+  scale_fill_viridis_d(direction=-1)+
+  theme(legend.position = "none")+
+  ggtitle(paste(args[1], "Chi-squared =", round(kw$statistic,2), "df = ", kw$parameter, "p-value =", kw$p.value, sep=" "))+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
 
 dev.off()
