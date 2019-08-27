@@ -108,8 +108,11 @@ disomic<-filter(total, Prediction=="Disomic")
 tetrasomic<-filter(total, Prediction=="Tetrasomic")
 kw <- wilcox.test(disomic$Similarity, tetrasomic$Similarity)
 
-pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
+pdf(paste("./outputs/108/", args[1], "-accuracy-v-neighbors.pdf",sep=""), width=7, height=5)
 ggplot(fit)
+dev.off()
+
+pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
 
 ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
