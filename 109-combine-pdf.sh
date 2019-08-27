@@ -5,3 +5,8 @@ pdfjam ./outputs/108/t-thymallus-boxplots.pdf ./outputs/108/salmo-salar-boxplots
 ./outputs/108/s-alpinus-boxplots.pdf ./outputs/108/o-mykiss-boxplots.pdf \
 ./outputs/108/o-tshaw-boxplots.pdf ./outputs/108/o-kisutch-boxplots.pdf \
 --nup 1x6 --outfile ./outputs/109/Fig4.pdf
+
+pdfjam ./outputs/108/t-thymallus-predictions.pdf ./outputs/108/salmo-salar-predictions.pdf \
+./outputs/108/s-alpinus-predictions.pdf ./outputs/108/o-mykiss-predictions.pdf \
+./outputs/108/o-tshaw-predictions.pdf ./outputs/108/o-kisutch-predictions.pdf \
+--nup 1x6 --outfile ./outputs/109/S8_support_for_assignment.pdf

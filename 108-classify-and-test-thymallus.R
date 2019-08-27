@@ -112,14 +112,18 @@ pdf(paste("./outputs/108/", args[1], "-accuracy-v-neighbors.pdf",sep=""), width=
 ggplot(fit)
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
+pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
 
 ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
-  geom_text(aes(x=Comparison, y=(Median+5)), label=summary$Probability, size=2)+
+  geom_text(aes(x=Comparison, y=(Median+3)), label=summary$Probability, size=3)+
+  coord_cartesian(ylim=c(75,100))+
   theme_classic()+
-  theme(axis.text.x=element_text(angle=45, hjust=1))+
-  xlab("Protokaryotype")
+  theme(axis.text.x=element_text(angle=45, hjust=1, face="bold"))+
+  theme(axis.title.x = element_blank())+
+  theme(axis.title.y = element_blank())+
+  ggtitle("T. thy")+
+  theme(plot.title = element_text(hjust = 0.5, size=12, face="bold"))
 
 
 

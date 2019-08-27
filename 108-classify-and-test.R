@@ -134,17 +134,33 @@ disomic<-filter(total, Prediction=="Disomic")
 tetrasomic<-filter(total, Prediction=="Tetrasomic")
 kw <- wilcox.test(disomic$Similarity, tetrasomic$Similarity)
 
+#Now to get a name that is in line with the paper
 
+taxon <- ifelse(args[1]=="t-thymallus", "T. thy",
+         ifelse(args[1]=="salmo-salar", "S. sal",
+         ifelse(args[1]=="s-alpinus", "S. alp",
+         ifelse(args[1]=="o-mykiss", "O. myk",
+         ifelse(args[1]=="o-tshaw", "O. tsh",
+         ifelse(args[1]=="o-kisutch", "O. kis",
+                "needs proper name"))))))
 pdf(paste("./outputs/108/",args[1],"-accuracy-v-neighbors.pdf", sep=""), width=7, height=5)
 ggplot(fit)
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=7, height=5)
+pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
 
 ggplot(summary)+geom_bar(aes(x=Protokaryotype, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
-  geom_text(aes(x=Protokaryotype, y=(Median+5)), label=summary$Probability, size=2)+
-  theme_classic()
+  geom_text(aes(x=Protokaryotype, y=(Median+3)), label=summary$Probability, size=3)+
+  coord_cartesian(ylim=c(75,100))+
+  theme_classic()+
+  theme(axis.text.x=element_text(angle=45, hjust=1, face="bold"))+
+  theme(axis.title.x = element_blank())+
+  theme(axis.title.y = element_blank())+
+  ggtitle(taxon)+
+  theme(plot.title = element_text(hjust = 0.5, size=12, face="bold"))
+  
+
 
 
 dev.off()
