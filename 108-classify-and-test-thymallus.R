@@ -23,7 +23,11 @@ data$Bottom<-as.numeric(data$Bottom)
 data<-data %>% mutate(Similarity = Top/Bottom*100)
 
 #Create labels
-data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
+data$Comparison<-gsub("\\D","", data$V2)
+data$Comparison<-as.numeric(data$Comparison)
+
+#Previously did this:
+#data<-data %>% mutate(Comparison = paste(V2,V7, sep = "-"))
 
 
 #filter for alignment lengths
@@ -111,29 +115,35 @@ ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="bl
   scale_fill_viridis_d(direction=-1) + 
   geom_text(aes(x=Comparison, y=(Median+5)), label=summary$Probability, size=2)+
   theme_classic()+
-  theme(axis.text.x=element_text(angle=45, hjust=1))
+  theme(axis.text.x=element_text(angle=45, hjust=1))+
+  xlab("Protokaryotype")
 
 
 
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-boxplots.pdf", sep=""), width =11, height = 8.5/2)
+pdf(paste("./outputs/108/",args[1],"-boxplots.pdf", sep=""), width =8.5, height = 11/6)
 ggplot(total)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLength, fill=Prediction),
-                           outlier.size=0.1, outlier.alpha=0.5, outlier.shape=15,
+                           outlier.size=0.05, outlier.alpha=0.5, outlier.shape=15,
+                           outlier.stroke=0.25,
                            alpha=0.5)+
   theme_classic()+
   ylab("Perecent Similarity")+
   theme(axis.text.x= element_text(angle=45,hjust=1, face = "bold"))+
   geom_hline(yintercept = yint, alpha=0.75, linetype="dashed", color="grey50")+
   geom_text(data = samplesize, aes(label = n, x=Comparison,
-                                   y = 100+1), size=3)+
+                                   y = 100+2), size=2)+
   #geom_text(data = samplesize, aes(label = Comparison,
   #                           x = Protokaryotype, y = 100 + 2), size=2.5, angle=45)+
   ylim(75,103)+
   scale_fill_viridis_d(direction=-1)+
   theme(legend.position = "none")+
   ggtitle(paste(args[1], "W =", round(kw$statistic,2), "p-value =", kw$p.value, sep=" "))+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(axis.text.x=element_text(angle=45, hjust=1))
+  ggtitle("T. thy")+
+  theme(plot.title = element_text(hjust = 0.5, size=8))+
+  theme(axis.title.x = element_blank())+
+  theme(axis.title.y = element_blank())
+  #theme(axis.text.x=element_text(angle=45, hjust=1))+
+  #xlab("Protokaryotype")
 
 dev.off()
