@@ -1,6 +1,5 @@
 #! /usr/bin/perl -w
-# Started by Mac Campbell DrMacCampbell@gmail.com
-# April 17, 2019, Revision to GitHub on 05312019
+# By Mac Campbell DrMacCampbell@gmail.com
 # The goal is to drive multiple lastz comparisons using
 # a "myPairs.txt" file that is space-delimited and
 # gnu-parallel

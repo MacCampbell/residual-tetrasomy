@@ -1,4 +1,6 @@
-# Don't have PK info for arctic charr/grayling
+#! /usr/local/bin/Rscript
+
+#PK infor for grayling included in lastz aligments
 library(tidyverse)
 library(ggvis)
 library(class)
@@ -45,26 +47,12 @@ data$Comparison <- reorder(data$Comparison, desc(data$Median))
 samplesize <- data %>% group_by(Comparison) %>% count_()
 
 
-#Handy normalization function if needed
-#normalize <- function(x) {
-# num <- x - min(x)
-#denom <- max(x) - min(x)
-#return (num/denom)
-#}
 
 #Using "summary" object from previous script
 summary <- data %>% group_by(Comparison, Median) %>% mutate(Mean=mean(Similarity)) %>% 
   select(Comparison, Mean, Median) %>% ungroup() %>% group_by(Comparison, Mean, Median) %>% 
   summarize()
 
-#summary
-#> summary
-#Protokaryotype     Mean   Median
-#1              11 92.17410 93.94942
-
-#create a training set
-#To do, create a way to generate it programmatically instead of
-#training<-summary %>% dplyr::filter(Protokaryotype %in% c(16,21,24,23,11,20,2,9))
 
 head<-head(summary, 4)
 tail<-tail(summary, 4)
@@ -76,8 +64,7 @@ training$Type<-train.labels
 
 
 #Can we identify the best k?
-#trControl <- trainControl(method  = "cv",
-#                          number  = 10)
+
 
 trControl <- trainControl(method = "repeatedcv",
                           number = 100,
@@ -108,11 +95,11 @@ disomic<-filter(total, Prediction=="Disomic")
 tetrasomic<-filter(total, Prediction=="Tetrasomic")
 kw <- wilcox.test(disomic$Similarity, tetrasomic$Similarity)
 
-pdf(paste("./outputs/108/", args[1], "-accuracy-v-neighbors.pdf",sep=""), width=7, height=5)
+pdf(paste("./outputs/201/", args[1], "-accuracy-v-neighbors.pdf",sep=""), width=7, height=5)
 ggplot(fit)
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
+pdf(paste("./outputs/201/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
 
 ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
@@ -129,7 +116,7 @@ ggplot(summary)+geom_bar(aes(x=Comparison, y=Median, fill=Prediction), color="bl
 
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-boxplots.pdf", sep=""), width =8.5, height = 11/6)
+pdf(paste("./outputs/201/",args[1],"-boxplots.pdf", sep=""), width =8.5, height = 11/6)
 ggplot(total)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLength, fill=Prediction),
                            outlier.size=0.05, outlier.alpha=0.5, outlier.shape=15,
                            outlier.stroke=0.25,
@@ -147,7 +134,7 @@ ggplot(total)+geom_boxplot(aes(x=Comparison, y=Similarity, weight=AlignmentLengt
   theme(legend.position = "none")+
   ggtitle(paste(args[1], "W =", round(kw$statistic,2), "p-value =", kw$p.value, sep=" "))+
   ggtitle("T. thy")+
-  theme(plot.title = element_text(hjust = 0.5, size=8))+
+  theme(plot.title = element_text(hjust = 0.5, size=12, face="bold"))+
   theme(axis.title.x = element_blank())+
   theme(axis.title.y = element_blank())
   #theme(axis.text.x=element_text(angle=45, hjust=1))+

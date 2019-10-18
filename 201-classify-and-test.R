@@ -1,6 +1,6 @@
 #! /usr/local/bin/RScript
 # Usage
-# ./108-classify-and-test.R salmo-salar
+# ./201-classify-and-test.R salmo-salar
 
 library(tidyverse)
 library(ggvis)
@@ -9,9 +9,8 @@ library(gmodels)
 library(viridis)
 library(matrixStats)
 library(caret)
-### This is recycled
+
 args <- commandArgs(trailingOnly = TRUE)
-#args<-c("s-alpinus")
 
 protos<-as_tibble(read.table(paste("./data/",args[1],"/",args[1], "-protokaryotype.txt", sep=""))) %>%
   rename(Protokaryotype = V1, Comparison = V2)
@@ -62,36 +61,18 @@ data <- data %>% group_by(Comparison) %>% mutate(Median = weightedMedian(Similar
 data$Comparison <- reorder(data$Comparison, desc(data$Median))
 data$Protokaryotype <- reorder(data$Protokaryotype, desc(data$Median))
 
-eight<-c(2,20,22,9,11,23,25,1)
-tetra<-c(2,20,22,9,11,23,25)
-data <- data %>% mutate(Type = ifelse(Protokaryotype %in% eight, "Tetrasomic", "Disomic"))
-
 
 #Sample Sizes?
 samplesize <- data %>% group_by(Comparison) %>% count_()
 samplesize <- left_join(samplesize, protos)
 
 
-#Handy normalization function if needed
-#normalize <- function(x) {
-# num <- x - min(x)
-#denom <- max(x) - min(x)
-#return (num/denom)
-#}
-
-#Using "summary" object from previous script
+#Create summary object
 summary <- data %>% group_by(Protokaryotype, Median) %>% mutate(Mean=mean(Similarity)) %>% 
   select(Protokaryotype, Mean, Median) %>% ungroup() %>% group_by(Protokaryotype, Mean, Median) %>% 
   summarize()
 
-#summary
-#> summary
-#Protokaryotype     Mean   Median
-#1              11 92.17410 93.94942
-
 #create a training set
-#To do, create a way to generate it programmatically instead of
-#training<-summary %>% dplyr::filter(Protokaryotype %in% c(16,21,24,23,11,20,2,9))
 
 head<-head(summary, 4)
 tail<-tail(summary, 4)
@@ -102,9 +83,7 @@ train.labels<-factor(c("Tetrasomic","Tetrasomic","Tetrasomic", "Tetrasomic",
 training$Type<-train.labels
 
 
-#Can we identify the best k?
-#trControl <- trainControl(method  = "cv",
-#                          number  = 10)
+#Identifying the best k
 
 trControl <- trainControl(method = "repeatedcv",
                           number = 100,
@@ -143,11 +122,11 @@ taxon <- ifelse(args[1]=="t-thymallus", "T. thy",
          ifelse(args[1]=="o-tshaw", "O. tsh",
          ifelse(args[1]=="o-kisutch", "O. kis",
                 "needs proper name"))))))
-pdf(paste("./outputs/108/",args[1],"-accuracy-v-neighbors.pdf", sep=""), width=7, height=5)
+pdf(paste("./outputs/201/",args[1],"-accuracy-v-neighbors.pdf", sep=""), width=7, height=5)
 ggplot(fit)
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
+pdf(paste("./outputs/201/",args[1],"-predictions.pdf", sep=""), width=8.5, height=11/6)
 
 ggplot(summary)+geom_bar(aes(x=Protokaryotype, y=Median, fill=Prediction), color="black", stat="identity", alpha=0.5) + 
   scale_fill_viridis_d(direction=-1) + 
@@ -165,7 +144,7 @@ ggplot(summary)+geom_bar(aes(x=Protokaryotype, y=Median, fill=Prediction), color
 
 dev.off()
 
-pdf(paste("./outputs/108/",args[1],"-boxplots.pdf", sep=""), width =8.5, height = 11/6)
+pdf(paste("./outputs/201/",args[1],"-boxplots.pdf", sep=""), width =8.5, height = 11/6)
 ggplot(total)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentLength, fill=Prediction),
                            outlier.size=0.05, outlier.alpha=0.5, outlier.shape=15,
                            outlier.stroke=0.25,
@@ -181,9 +160,9 @@ ggplot(total)+geom_boxplot(aes(x=Protokaryotype, y=Similarity, weight=AlignmentL
   ylim(75,103)+
   scale_fill_viridis_d(direction=-1)+
   theme(legend.position = "none")+
-  ggtitle(paste(args[1]))+
+  ggtitle(taxon)+
   #ggtitle(paste(args[1], "W =", round(kw$statistic,2), "p-value =", kw$p.value, sep=" "))+
-  theme(plot.title = element_text(hjust = 0.5, size=8))+
+  theme(plot.title = element_text(hjust = 0.5, size=12, face="bold"))+
   theme(axis.title.x = element_blank())+
   theme(axis.title.y = element_blank())
 
