@@ -1,5 +1,5 @@
-# magic-eight
-For identification of likely tetrasomic homeologs versus likely disomic homeologs in salmonids
+# residual-tetrasomy
+For identification of likely tetrasomic homeologs versus likely disomic homeologs (in salmonids)
 
 ## Goals
 A plot of overall similarity between homeologous pairs based on protokaryotype notation with classification into "tetrasomic" or "disomic" groups using any high-quality assembly.
