@@ -1,11 +1,11 @@
 # residual-tetrasomy
-For identification of likely tetrasomic homeologs versus likely disomic homeologs (in salmonids)
+For identification of likely tetrasomic homeologs versus likely disomic homeologs (in salmonids). Associated paper: https://doi.org/10.1534/g3.120.401497     
 
 ## Goals
 A plot of overall similarity between homeologous pairs based on protokaryotype notation with classification into "tetrasomic" or "disomic" groups using any high-quality assembly.
 
 ## Files
-  * Should be designed so you can execute the files in the /magic-eight/ directory
+  * Should be designed so you can execute the files in the /residual-tetrasomy/ directory
   * 10x.x-xxxxx.xx sequentially ordered files of what to do
   * These will basically run at first by using files in /data/ then putting outputs in /outputs/10x
   * The scripts should receive input from previous scripts and output into their own /outputs/xxx
